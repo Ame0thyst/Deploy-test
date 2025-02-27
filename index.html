@@ -3,41 +3,101 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formspree</title>
+    <title>Multimedia Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      #audioPreview audio {
+        margin-top: 10px;
+      }
+      #photoPreview {
+        max-width: 300px;
+        margin-top: 10px;
+      }
+    </style>
   </head>
   <body class="bg-black text-white font-mono">
     <main class="flex flex-col items-center">
       <h1 class="font-black text-5xl mt-8 text-center">No Google Form</h1>
       <form
-        action="https://formspree.io/f/xdknkpgl"
+        action="https://formspree.io/f/mwpvdgwv"
         method="POST"
         class="text-xl mt-16 w-1/2 flex flex-col gap-8 justify-center items-center"
+        enctype="multipart/form-data"
       >
-        <label>
+        <!-- Text Inputs -->
+        <label class="w-full">
           <p>Your name:</p>
           <input
             type="text"
             name="name"
-            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300"
+            required
+            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300 w-full"
           />
         </label>
-        <label>
+
+        <label class="w-full">
           <p>Your email:</p>
           <input
             type="email"
             name="email"
-            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300"
+            required
+            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300 w-full"
           />
         </label>
-        <label>
+
+        <label class="w-full">
           <p>Your message:</p>
           <textarea
             name="message"
-            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300"
+            required
+            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300 w-full"
           ></textarea>
         </label>
-        <!-- your other form fields go here -->
+
+        <!-- Voice Recording -->
+        <div class="w-full">
+          <p>Voice Recording:</p>
+          <div class="flex gap-2 mt-2">
+            <button
+              type="button"
+              id="startRecord"
+              class="bg-red-600 px-4 py-2 rounded hover:bg-red-500"
+            >
+              Start
+            </button>
+            <button
+              type="button"
+              id="stopRecord"
+              disabled
+              class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-500"
+            >
+              Stop
+            </button>
+          </div>
+          <div id="audioPreview" class="mt-2"></div>
+          <input
+            type="file"
+            name="audio"
+            id="audioFile"
+            hidden
+            accept="audio/*"
+          />
+        </div>
+
+        <!-- Photo Upload -->
+        <label class="w-full">
+          <p>Upload Photo:</p>
+          <input
+            type="file"
+            name="photo"
+            id="photoInput"
+            accept="image/*"
+            required
+            class="w-full mt-2"
+          />
+          <img id="photoPreview" class="rounded-md" />
+        </label>
+
         <button
           type="submit"
           class="bg-blue-800 p-2 ring-2 ring-blue-800 px-4 hover:bg-blue-500 rounded-sm focus:outline-none focus:ring-blue-300"
@@ -46,5 +106,69 @@
         </button>
       </form>
     </main>
+
+    <script>
+      // Voice Recording Logic
+      let mediaRecorder,
+        audioChunks = [];
+      const startButton = document.getElementById("startRecord");
+      const stopButton = document.getElementById("stopRecord");
+      const audioPreview = document.getElementById("audioPreview");
+      const audioFileInput = document.getElementById("audioFile");
+
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          mediaRecorder = new MediaRecorder(stream);
+
+          startButton.addEventListener("click", () => {
+            audioChunks = [];
+            mediaRecorder.start();
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            audioPreview.innerHTML = "Recording...";
+          });
+
+          stopButton.addEventListener("click", () => {
+            mediaRecorder.stop();
+            startButton.disabled = false;
+            stopButton.disabled = true;
+          });
+
+          mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            // Create preview player
+            audioPreview.innerHTML = `<audio controls src="${audioUrl}"></audio>`;
+
+            // Convert blob to File and assign to file input
+            const audioFile = new File([audioBlob], "recording.webm", {
+              type: "audio/webm",
+            });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(audioFile);
+            audioFileInput.files = dataTransfer.files;
+          };
+        })
+        .catch((err) => {
+          console.error("Error accessing microphone:", err);
+          audioPreview.innerHTML = "Microphone access denied";
+        });
+
+      // Photo Preview
+      const photoInput = document.getElementById("photoInput");
+      const photoPreview = document.getElementById("photoPreview");
+
+      photoInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+          photoPreview.src = URL.createObjectURL(file);
+          photoPreview.onload = () => URL.revokeObjectURL(this.src);
+        }
+      });
+    </script>
   </body>
 </html>
