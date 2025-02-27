@@ -3,98 +3,179 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voice of Love ❤️</title>
-    <link rel="stylesheet" href="style.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
-      rel="stylesheet"
-    />
+    <title>Form Input Multimedia</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+      .preview {
+        margin: 10px 0;
+      }
+      #photoPreview {
+        max-width: 300px;
+        max-height: 200px;
+      }
+      #recordingsList {
+        margin-top: 10px;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
-      <h1>Our Secret Messages 💌</h1>
-      <div class="buttons">
-        <button id="playBtn1">Sweet Message 🌸</button>
-        <button id="playBtn2">Love Note 🌹</button>
+    <h2>Form Multimedia</h2>
+    <form
+      id="myForm"
+      action="https://formspree.io/f/mzzdlnjw"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <!-- Input Teks -->
+      <div>
+        <label for="textInput">Text Input:</label><br />
+        <textarea
+          id="textInput"
+          name="text"
+          rows="4"
+          cols="50"
+          required
+        ></textarea>
       </div>
 
-      <div id="waveform">
-        <canvas id="canvas"></canvas>
+      <!-- Rekam Suara -->
+      <div>
+        <label>Rekam Suara:</label><br />
+        <button type="button" id="startRecord">Mulai Rekam</button>
+        <button type="button" id="stopRecord" disabled>Stop Rekam</button>
+        <div id="recordingsList"></div>
       </div>
 
-      <div class="player-controls">
-        <div class="progress-container">
-          <div class="progress-bar"></div>
+      <!-- Upload Foto -->
+      <div>
+        <label for="photoInput">Upload Foto:</label><br />
+        <input
+          type="file"
+          id="photoInput"
+          name="upload"
+          accept="image/*"
+          required
+        />
+        <div class="preview">
+          <img id="photoPreview" src="#" alt="Preview Foto" class="hidden" />
         </div>
-        <div class="time-display">
-          <span id="currentTime">0:00</span>
-          <span id="duration">0:00</span>
-        </div>
-        <div class="volume-container">
-          <span>🔊</span>
-          <input
-            type="range"
-            id="volume"
-            min="0"
-            max="1"
-            step="0.1"
-            value="1"
-          />
-        </div>
-        <button class="visualization-toggle" id="vizToggle">
-          Switch Visualization
-        </button>
-
-        <form id="myForm">
-          <!-- Question 1 -->
-          <div>
-            <label>Seberapa sayang kamu sama aku?</label><br />
-            <label><input type="radio" name="sayang" value="25%" /> 25%</label>
-            <label><input type="radio" name="sayang" value="50%" /> 50%</label>
-            <label><input type="radio" name="sayang" value="75%" /> 75%</label>
-            <label
-              ><input type="radio" name="sayang" value="100%" /> 100%</label
-            >
-          </div>
-
-          <!-- Question 2 -->
-          <div>
-            <label>Apa kekurangan aku?</label><br />
-            <input type="text" name="kekurangan" />
-          </div>
-
-          <!-- Question 3 -->
-          <div>
-            <label>Gimana kesannya selama sama aku?</label><br />
-            <textarea name="kesan"></textarea>
-          </div>
-
-          <!-- Question 4 -->
-          <div>
-            <label>Kata-kata untuk aku:</label><br />
-            <button type="button" onclick="startRecording()">
-              Rekam Suara
-            </button>
-            <button type="button" onclick="stopRecording()">Stop</button>
-            <audio id="audioPreview" controls></audio>
-            <input type="hidden" name="voice" id="voiceInput" />
-          </div>
-
-          <!-- Question 5 -->
-          <div>
-            <label>Upload Foto:</label>
-            <input type="file" id="fotoInput" accept="image/*" />
-            <input type="hidden" name="foto" id="fotoHidden" />
-          </div>
-
-          <button type="submit">Kirim</button>
-        </form>
       </div>
-    </div>
 
-    <canvas id="canvas"></canvas>
+      <button type="submit">Kirim Data</button>
+    </form>
 
-    <script src="main.js"></script>
-    <script src="main2.js"></script>
+    <script>
+      // Preview Foto
+      const photoInput = document.getElementById("photoInput");
+      const photoPreview = document.getElementById("photoPreview");
+
+      photoInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            photoPreview.src = e.target.result;
+            photoPreview.classList.remove("hidden");
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Rekam Suara
+      let mediaRecorder;
+      let audioChunks = [];
+
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          mediaRecorder = new MediaRecorder(stream);
+
+          document
+            .getElementById("startRecord")
+            .addEventListener("click", () => {
+              audioChunks = [];
+              mediaRecorder.start();
+              document.getElementById("startRecord").disabled = true;
+              document.getElementById("stopRecord").disabled = false;
+            });
+
+          document
+            .getElementById("stopRecord")
+            .addEventListener("click", () => {
+              mediaRecorder.stop();
+              document.getElementById("startRecord").disabled = false;
+              document.getElementById("stopRecord").disabled = true;
+            });
+
+          mediaRecorder.ondataavailable = function (e) {
+            audioChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = function () {
+            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            // Create audio element for preview
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.src = audioUrl;
+
+            // Create hidden input for form submission
+            const audioInput = document.createElement("input");
+            audioInput.type = "hidden";
+            audioInput.name = "audio";
+            audioInput.value = audioUrl;
+
+            const recordingsList = document.getElementById("recordingsList");
+            recordingsList.innerHTML = "";
+            recordingsList.appendChild(audio);
+            recordingsList.appendChild(audioInput);
+          };
+        })
+        .catch((err) => {
+          console.error("Error accessing microphone:", err);
+        });
+
+      // Form Submission
+      document
+        .getElementById("myForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Create FormData object
+          const formData = new FormData(this);
+
+          // Add audio blob to form data
+          const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+          formData.append("audio", audioBlob, "recording.wav");
+
+          // Send form data
+          fetch(this.action, {
+            method: this.method,
+            body: formData,
+          })
+            .then((response) => {
+              if (response.ok) {
+                alert("Data berhasil dikirim!");
+                this.reset();
+                photoPreview.classList.add("hidden");
+                recordingsList.innerHTML = "";
+              } else {
+                alert("Terjadi kesalahan saat mengirim data");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+    </script>
   </body>
 </html>
