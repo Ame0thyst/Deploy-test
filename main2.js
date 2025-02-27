@@ -39,7 +39,7 @@
     });
 
     // Form Submission
-    document.getElementById('myForm').addEventListener('submit', async function(e) {
+   document.getElementById('myForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
   const sayang = this.sayang.value;
@@ -47,6 +47,11 @@
   const kesan = this.kesan.value;
   const voiceFile = this.voice.files[0];
   const fotoFile = this.foto.files[0];
+
+  if (!voiceFile || !fotoFile) {
+    alert('Please select both voice and photo files.');
+    return;
+  }
 
   const getBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -57,24 +62,31 @@
     });
   };
 
-  const voiceBase64 = await getBase64(voiceFile);
-  const fotoBase64 = await getBase64(fotoFile);
+  try {
+    const voiceBase64 = await getBase64(voiceFile);
+    const fotoBase64 = await getBase64(fotoFile);
 
-  const formData = {
-    sayang,
-    kekurangan,
-    kesan,
-    voice: voiceBase64,
-    foto: fotoBase64
-  };
+    const formData = {
+      sayang,
+      kekurangan,
+      kesan,
+      voice: voiceBase64,
+      foto: fotoBase64
+    };
 
-  const response = await fetch('https://script.google.com/macros/s/AKfycbw5Qcq-_DG4COxn1JDP1SIgIjhHx6QgXJ9vPkd4wp2N-NwqtJyKNG_1NACiy2h8VKvN-w/exec', {
-    method: 'POST',
-    body: JSON.stringify(formData)
-  });
+    const response = await fetch('https://script.google.com/macros/s/AKfycbw5Qcq-_DG4COxn1JDP1SIgIjhHx6QgXJ9vPkd4wp2N-NwqtJyKNG_1NACiy2h8VKvN-w/exec', {
+      method: 'POST',
+      body: JSON.stringify(formData)
+    });
 
-  if(response.ok) {
-    alert('Data berhasil dikirim!');
-    this.reset();
+    if (response.ok) {
+      alert('Data berhasil dikirim!');
+      this.reset();
+    } else {
+      alert('Failed to send data.');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred while sending data.');
   }
 });
