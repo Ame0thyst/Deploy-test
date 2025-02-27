@@ -1,0 +1,5 @@
+id penerapan :
+AKfycbwpIahS927qAFMFlyAIwHmrFlmz9s9HVHLR4C3DYhUp3-lIKUZLAPyRQRRkEtpZA9uCng
+
+aplikasi web :
+https://script.google.com/macros/s/AKfycbwpIahS927qAFMFlyAIwHmrFlmz9s9HVHLR4C3DYhUp3-lIKUZLAPyRQRRkEtpZA9uCng/exec

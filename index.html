@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voice of Love ❤️</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Our Secret Messages 💌</h1>
+      <div class="buttons">
+        <button id="playBtn1">Sweet Message 🌸</button>
+        <button id="playBtn2">Love Note 🌹</button>
+      </div>
+
+      <div id="waveform">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="player-controls">
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="time-display">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+        <div class="volume-container">
+          <span>🔊</span>
+          <input
+            type="range"
+            id="volume"
+            min="0"
+            max="1"
+            step="0.1"
+            value="1"
+          />
+        </div>
+        <button class="visualization-toggle" id="vizToggle">
+          Switch Visualization
+        </button>
+
+        <form id="myForm">
+          <!-- Question 1 -->
+          <div>
+            <label>Seberapa sayang kamu sama aku?</label><br />
+            <label><input type="radio" name="sayang" value="25%" /> 25%</label>
+            <label><input type="radio" name="sayang" value="50%" /> 50%</label>
+            <label><input type="radio" name="sayang" value="75%" /> 75%</label>
+            <label
+              ><input type="radio" name="sayang" value="100%" /> 100%</label
+            >
+          </div>
+
+          <!-- Question 2 -->
+          <div>
+            <label>Apa kekurangan aku?</label><br />
+            <input type="text" name="kekurangan" />
+          </div>
+
+          <!-- Question 3 -->
+          <div>
+            <label>Gimana kesannya selama sama aku?</label><br />
+            <textarea name="kesan"></textarea>
+          </div>
+
+          <!-- Question 4 -->
+          <div>
+            <label>Kata-kata untuk aku:</label><br />
+            <button type="button" onclick="startRecording()">
+              Rekam Suara
+            </button>
+            <button type="button" onclick="stopRecording()">Stop</button>
+            <audio id="audioPreview" controls></audio>
+            <input type="hidden" name="voice" id="voiceInput" />
+          </div>
+
+          <!-- Question 5 -->
+          <div>
+            <label>Upload Foto:</label>
+            <input type="file" id="fotoInput" accept="image/*" />
+            <input type="hidden" name="foto" id="fotoHidden" />
+          </div>
+
+          <button type="submit">Kirim</button>
+        </form>
+      </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script src="main.js"></script>
+    <script src="main2.js"></script>
+  </body>
+</html>
