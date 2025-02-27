@@ -3,169 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Multimedia Form</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 600px;
-        margin: 20px auto;
-        padding: 20px;
-      }
-      .preview {
-        margin: 10px 0;
-      }
-      #photoPreview {
-        max-width: 300px;
-        max-height: 200px;
-      }
-      .hidden {
-        display: none;
-      }
-      .form-section {
-        margin-bottom: 30px;
-        padding: 20px;
-        border: 1px solid #ccc;
-      }
-    </style>
+    <title>Formspree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <h1>Multimedia Form</h1>
-
-    <!-- Form untuk Teks dan Foto -->
-    <div class="form-section">
-      <h2>Form Teks & Foto</h2>
+  <body class="bg-black text-white font-mono">
+    <main class="flex flex-col items-center">
+      <h1 class="font-black text-5xl mt-8 text-center">No Google Form</h1>
       <form
-        id="mainForm"
-        action="https://formspree.io/f/mzzdlnjw"
+        action="https://formspree.io/f/xdknkpgl"
         method="POST"
-        enctype="multipart/form-data"
+        class="text-xl mt-16 w-1/2 flex flex-col gap-8 justify-center items-center"
       >
-        <div>
-          <label for="textInput">Text Input:</label><br />
-          <textarea
-            id="textInput"
-            name="text"
-            rows="4"
-            cols="50"
-            required
-          ></textarea>
-        </div>
-
-        <div>
-          <label for="photoInput">Upload Foto:</label><br />
+        <label>
+          <p>Your name:</p>
           <input
-            type="file"
-            id="photoInput"
-            name="photo"
-            accept="image/*"
-            required
+            type="text"
+            name="name"
+            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300"
           />
-          <div class="preview">
-            <img id="photoPreview" src="#" alt="Preview Foto" class="hidden" />
-          </div>
-        </div>
-
-        <button type="submit">Kirim Teks & Foto</button>
+        </label>
+        <label>
+          <p>Your email:</p>
+          <input
+            type="email"
+            name="email"
+            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300"
+          />
+        </label>
+        <label>
+          <p>Your message:</p>
+          <textarea
+            name="message"
+            class="bg-black ring-2 p-2 rounded-md focus:outline-none focus:ring-blue-300"
+          ></textarea>
+        </label>
+        <!-- your other form fields go here -->
+        <button
+          type="submit"
+          class="bg-blue-800 p-2 ring-2 ring-blue-800 px-4 hover:bg-blue-500 rounded-sm focus:outline-none focus:ring-blue-300"
+        >
+          Send
+        </button>
       </form>
-    </div>
-
-    <!-- Form untuk Rekaman Suara -->
-    <div class="form-section">
-      <h2>Form Rekaman Suara</h2>
-      <div>
-        <button type="button" id="startRecord">Mulai Rekam</button>
-        <button type="button" id="stopRecord" disabled>Stop Rekam</button>
-        <div id="audioPreview"></div>
-      </div>
-      <div id="audioUploadStatus"></div>
-    </div>
-
-    <script>
-      // Preview Foto
-      const photoInput = document.getElementById("photoInput");
-      const photoPreview = document.getElementById("photoPreview");
-
-      photoInput.addEventListener("change", function () {
-        const file = this.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            photoPreview.src = e.target.result;
-            photoPreview.classList.remove("hidden");
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // Audio Recording
-      let mediaRecorder;
-      let audioChunks = [];
-      const audioPreview = document.getElementById("audioPreview");
-      const statusDiv = document.getElementById("audioUploadStatus");
-
-      navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then((stream) => {
-          mediaRecorder = new MediaRecorder(stream);
-
-          document
-            .getElementById("startRecord")
-            .addEventListener("click", () => {
-              audioChunks = [];
-              mediaRecorder.start();
-              document.getElementById("startRecord").disabled = true;
-              document.getElementById("stopRecord").disabled = false;
-              statusDiv.textContent = "Sedang merekam...";
-            });
-
-          document
-            .getElementById("stopRecord")
-            .addEventListener("click", () => {
-              mediaRecorder.stop();
-              document.getElementById("startRecord").disabled = false;
-              document.getElementById("stopRecord").disabled = true;
-              statusDiv.textContent = "Mengupload rekaman...";
-            });
-
-          mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-
-          mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-
-            // Create preview
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPreview.innerHTML = `<audio controls src="${audioUrl}"></audio>`;
-
-            // Create FormData untuk audio
-            const formData = new FormData();
-            formData.append("audio", audioBlob, "recording.wav");
-
-            // Kirim ke endpoint berbeda
-            try {
-              const response = await fetch("https://formspree.io/f/mwpvdgwv", {
-                method: "POST",
-                body: formData,
-                headers: {
-                  Accept: "application/json",
-                },
-              });
-
-              if (response.ok) {
-                statusDiv.textContent = "Rekaman berhasil dikirim!";
-                audioPreview.innerHTML += "<p>✓ Terkirim</p>";
-              } else {
-                statusDiv.textContent = "Gagal mengupload rekaman";
-              }
-            } catch (error) {
-              console.error("Error:", error);
-              statusDiv.textContent = "Error mengupload rekaman";
-            }
-          };
-        })
-        .catch((err) => {
-          statusDiv.textContent = "Akses microphone ditolak";
-          console.error("Error accessing microphone:", err);
-        });
-    </script>
+    </main>
   </body>
 </html>
