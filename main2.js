@@ -40,24 +40,41 @@
 
     // Form Submission
     document.getElementById('myForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = {
-        sayang: this.sayang.value,
-        kekurangan: this.kekurangan.value,
-        kesan: this.kesan.value,
-        kata: this.kata.value,
-        voice: this.voice.value,
-        foto: this.foto.value
-      };
+  e.preventDefault();
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbw5Qcq-_DG4COxn1JDP1SIgIjhHx6QgXJ9vPkd4wp2N-NwqtJyKNG_1NACiy2h8VKvN-w/exec', {
-        method: 'POST',
-        body: JSON.stringify(formData)
-      });
-      
-      if(response.ok) {
-        alert('Data berhasil dikirim!');
-        this.reset();
-      }
+  const sayang = this.sayang.value;
+  const kekurangan = this.kekurangan.value;
+  const kesan = this.kesan.value;
+  const voiceFile = this.voice.files[0];
+  const fotoFile = this.foto.files[0];
+
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
     });
+  };
+
+  const voiceBase64 = await getBase64(voiceFile);
+  const fotoBase64 = await getBase64(fotoFile);
+
+  const formData = {
+    sayang,
+    kekurangan,
+    kesan,
+    voice: voiceBase64,
+    foto: fotoBase64
+  };
+
+  const response = await fetch('https://script.google.com/macros/s/AKfycbw5Qcq-_DG4COxn1JDP1SIgIjhHx6QgXJ9vPkd4wp2N-NwqtJyKNG_1NACiy2h8VKvN-w/exec', {
+    method: 'POST',
+    body: JSON.stringify(formData)
+  });
+
+  if(response.ok) {
+    alert('Data berhasil dikirim!');
+    this.reset();
+  }
+});
